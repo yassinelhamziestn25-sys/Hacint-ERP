@@ -18,4 +18,6 @@ router.register(r'tickets',    TicketViewSet,    basename='ticket')
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('grant-access/', views.grant_product_access, name='grant_product_access'),
+    path('employee-history/<int:user_id>/', views.employee_product_history, name='employee_product_history'),
 ]

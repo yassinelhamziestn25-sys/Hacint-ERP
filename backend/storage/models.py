@@ -3,7 +3,10 @@ from decimal import Decimal
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
-
+from django.db import models
+from django.contrib.auth import get_user_model
+from django.utils import timezone
+from datetime import timedelta
 
 # ─── Choices ──────────────────────────────────────────────────────────────────
 
@@ -254,10 +257,6 @@ class Ticket(models.Model):
     def __str__(self):
         return f"Ticket #{self.pk} — {self.type_source} — {self.date_scan:%Y-%m-%d %H:%M}"
 
-from django.db import models
-from django.contrib.auth import get_user_model
-from django.utils import timezone
-from datetime import timedelta
 
 User = get_user_model()
 

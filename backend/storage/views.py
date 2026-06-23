@@ -777,3 +777,60 @@ class TicketViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(utilisateur=self.request.user)
+
+    from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from django.utils import timezone
+from django.contrib.auth import get_user_model
+from .models import ProductAccess  # Import model jdid li zti dejà
+
+User = get_user_model()
+
+@api_view(['POST'])
+def grant_product_access(request):
+    product_id = request.data.get('product_id')
+    duration_minutes = request.data.get('duration_minutes')
+    is_infinite = request.data.get('is_infinite', False)
+    cocher_tous = request.data.get('cocher_tous', False)
+    
+    # Hna ghadi n-st3mlo direct l-id dyal product d storage
+    if not product_id:
+        return Response({"error": "product_id khass koun"}, status=status.HTTP_400_BAD_REQUEST)
+        
+    if cocher_tous:
+        users = User.objects.filter(is_staff=False)  # Kollchi l-khdama
+    else:
+        user_id = request.data.get('user_id')
+        users = User.objects.filter(id=user_id)
+
+    for u in users:
+        ProductAccess.objects.update_or_create(
+            product_id=product_id,  # Rbaṭnah b l-ID direct bla mouchkil d s-smiya
+            user=u,
+            defaults={
+                'duration_minutes': duration_minutes if not is_infinite else None,
+                'is_infinite': is_infinite,
+                'granted_at': timezone.now()  # Re-set d l-we9t jdid
+            }
+        )
+    return Response({"message": "Permission nja7at!"}, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def employee_product_history(request, user_id):
+    accesses = ProductAccess.objects.filter(user_id=user_id)
+    valid_products = []
+
+    for access in accesses:
+        # Dynamic calculation dyal l-we9t (10 min wla dynamic)
+        if access.has_active_access():
+            # Hna n-akhdo s-smiya d l-produit dynamic kifma m-smya 3ndkom f model d storage
+            # safe path dyal l-file direct mn storage item dyalkom
+            valid_products.append({
+                "id": access.product_id,
+                "infinite": access.is_infinite,
+                "granted_at": access.granted_at
+            })
+
+    return Response(valid_products, status=status.HTTP_200_OK)

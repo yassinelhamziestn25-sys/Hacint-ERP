@@ -178,10 +178,16 @@ function AddBtn({ onClick, label }) {
   )
 }
 
-function ActionBtns({ onEdit, onDelete }) {
+function ActionBtns({ onEdit, onDelete, onShare }) {
   return (
     <td className="px-4 py-3 text-right whitespace-nowrap">
       <button onClick={onEdit} className="text-blue-500 hover:underline mr-3 text-sm">Modifier</button>
+      <button
+        onClick={onShare || (() => alert('Partage active'))}
+        className="text-orange-500 hover:underline mr-3 text-sm font-medium"
+      >
+        ⏳ Partager
+      </button>
       <button onClick={onDelete} className="text-red-400 hover:underline text-sm">Suppr.</button>
     </td>
   )
@@ -1506,6 +1512,10 @@ function TicketsTab() {
 // The tab bar itself is rendered by the parent as StorageTabBar.
 
 export default function StoragePage({ tab = 'stock', currentUser }) {
+  const [cocherTous, setCocherTous] = useState(false)
+  const [duration, setDuration] = useState(10)
+  const [isInfinite, setIsInfinite] = useState(false)
+
   return (
     <div className="min-h-full bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-6">
@@ -1518,6 +1528,45 @@ export default function StoragePage({ tab = 'stock', currentUser }) {
         {tab === 'categories' && <CategoriesTab />}
         {tab === 'tickets'       && <TicketsTab />}
         {tab === 'bom-materiaux' && <BomMaterialsPage />}
+
+        {/* Partage dynamic — Timer d'accès Admin */}
+        <div className="p-4 border rounded-xl bg-gray-50 border-gray-200 my-4 shadow-sm">
+          <h6 className="text-sm font-semibold text-gray-800 mb-2">⚙️ Partage dynamic (Timer d l-Admin)</h6>
+
+          <div className="flex items-center gap-2 mb-3">
+            <input
+              type="checkbox"
+              id="cocherTous"
+              checked={cocherTous}
+              onChange={(e) => setCocherTous(e.target.checked)}
+            />
+            <label className="text-sm text-gray-700 cursor-pointer" htmlFor="cocherTous">
+              Sélectionner tous les employés (Cocher Tout)
+            </label>
+          </div>
+
+          <div className="mb-2">
+            <label className="block text-xs font-medium text-gray-500 mb-1">⏱️ Ekhtar l-wa9t d l-access:</label>
+            <select
+              className="w-full border rounded-lg px-3 py-1.5 text-sm"
+              value={isInfinite ? 'infinite' : duration}
+              onChange={(e) => {
+                if (e.target.value === 'infinite') {
+                  setIsInfinite(true)
+                  setDuration(null)
+                } else {
+                  setIsInfinite(false)
+                  setDuration(parseInt(e.target.value, 10))
+                }
+              }}
+            >
+              <option value="10">10 Dqayq (Défaut)</option>
+              <option value="30">30 Dqayq</option>
+              <option value="60">1 Sa3a (60 min)</option>
+              <option value="infinite">Illimité (À vie)</option>
+            </select>
+          </div>
+        </div>
       </div>
     </div>
   )

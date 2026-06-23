@@ -253,3 +253,27 @@ class Ticket(models.Model):
 
     def __str__(self):
         return f"Ticket #{self.pk} — {self.type_source} — {self.date_scan:%Y-%m-%d %H:%M}"
+
+from django.db import models
+from django.contrib.auth import get_user_model
+from django.utils import timezone
+from datetime import timedelta
+
+User = get_user_model()
+
+# L-Model jdid d l-Permissions b l-Timer
+class ProductAccess(models.Model):
+    # Hna ghadi n-rbtouh m3a l-Model d l-fichiers wla l-produits li 3ndkom f storage
+    # f blast 'Product', ila l9iti l-model f storage smito 'StorageItem' wla chi 7aja, ghadi n-beddloha
+    product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='accesses')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='product_accesses')
+    granted_at = models.DateTimeField(auto_now_add=True)
+    duration_minutes = models.IntegerField(null=True, blank=True) # Choice d l-admin (10 min, 1h...)
+    is_infinite = models.BooleanField(default=False) # À vie
+
+    def has_active_access(self):
+        if self.is_infinite:
+            return True
+        if not self.duration_minutes:
+            return False
+        return timezone.now() < self.granted_at + timedelta(minutes=self.duration_minutes)

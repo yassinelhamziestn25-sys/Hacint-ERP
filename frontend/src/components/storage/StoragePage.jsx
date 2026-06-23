@@ -155,6 +155,23 @@ function ImportResultBanner({ result, onClose }) {
     </div>
   )
 }
+// Fonction dynamic d l-partage
+const handleShareAccess = async (productId, options) => {
+  try {
+    // Options fiha durationMinutes, isInfinite, cocherTous, w userId
+    await axios.post('/api/storage/grant-access/', {
+      product_id: productId,
+      duration_minutes: options.durationMinutes, // 10, 30, 60...
+      is_infinite: options.isInfinite,         // true/false
+      cocher_tous: options.cocherTous,         // true/false
+      user_id: options.cocherTous ? null : options.userId
+    });
+    alert("L-permission t-ṣîftat b l-we9t dynamic!");
+  } catch (error) {
+    console.error("Mouchkil f l-partage", error);
+    alert("Trâ mouchkil f l-partage d l-access");
+  }
+};
 
 function Loading() { return <div className="text-center py-10 text-gray-400">Chargement...</div> }
 function Empty({ cols, msg = 'Aucun résultat' }) { return <tr><td colSpan={cols} className="text-center py-8 text-gray-400">{msg}</td></tr> }
@@ -684,23 +701,6 @@ function MouvementForm({ entrepots, onSubmit, onClose, saving }) {
     </form>
   )
 }
-// Fonction dynamic d l-partage
-const handleShareAccess = async (productId, options) => {
-  try {
-    // Options fiha durationMinutes, isInfinite, cocherTous, w userId
-    await axios.post('/api/storage/grant-access/', {
-      product_id: productId,
-      duration_minutes: options.durationMinutes, // 10, 30, 60...
-      is_infinite: options.isInfinite,         // true/false
-      cocher_tous: options.cocherTous,         // true/false
-      user_id: options.cocherTous ? null : options.userId
-    });
-    alert("L-permission t-ṣîftat b l-we9t dynamic!");
-  } catch (error) {
-    console.error("Mouchkil f l-partage", error);
-    alert("Trâ mouchkil f l-partage d l-access");
-  }
-};
 
 function MouvementsTab() {
   const [mouvements, setMouvements] = useState([])
